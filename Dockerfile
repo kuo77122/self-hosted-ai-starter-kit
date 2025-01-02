@@ -25,8 +25,10 @@ RUN cd /opt/Python-${PYTHON_VERSION} \
     && make install \
     && rm /opt/Python-${PYTHON_VERSION}.tgz /opt/Python-${PYTHON_VERSION} -rf
 
+# install ffmpeg
+RUN apk add --no-cache ffmpeg
 # install poetry
-RUN pip3 install poetry==1.2.0
+RUN pip3 install poetry==1.2.0 pandas numpy==1.26.4 pyarrow pyav
 # install pytorch(CPU)
 RUN pip3 install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cpu
 # install whisperx
@@ -34,4 +36,3 @@ RUN pip3 install git+https://github.com/m-bain/whisperx.git
 # install RapidOCR
 RUN pip3 install rapidocr_onnxruntime
 # install pandas, numpy and pyarrow
-RUN pip3 install pandas numpy pyarrow
