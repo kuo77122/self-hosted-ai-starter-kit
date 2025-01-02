@@ -3,13 +3,22 @@ volumes:
   postgres_storage:
   ollama_storage:
   qdrant_storage:
+  changedetection_storage:
 
 networks:
-  demo:
+  traefik:
+    external: true
 
 x-n8n: &service-n8n
-  image: n8nio/n8n:latest
-  networks: ['demo']
+  image: docker.io/kuo77122/n8n-python:latest
+  networks: ['traefik']
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.n8n-http.entrypoints=web"
+    - "traefik.http.routers.n8n-http.rule=(Host(`n8n.fattynan.com`))"
+    - "traefik.http.routers.n8n-http.service=n8n-backend"
+    - "traefik.http.services.n8n-backend.loadbalancer.server.scheme=http"
+    - "traefik.http.services.n8n-backend.loadbalancer.server.port=5678"
   environment:
     - DB_TYPE=postgresdb
     - DB_POSTGRESDB_HOST=postgres
@@ -19,13 +28,15 @@ x-n8n: &service-n8n
     - N8N_PERSONALIZATION_ENABLED=false
     - N8N_ENCRYPTION_KEY
     - N8N_USER_MANAGEMENT_JWT_SECRET
+    - GENERIC_TIMEZONE=Asia/Taipei
+    - WEBHOOK_URL=https://n8n.fattynan.com
   links:
     - postgres
 
 x-ollama: &service-ollama
   image: ollama/ollama:latest
   container_name: ollama
-  networks: ['demo']
+  networks: ['traefik']
   restart: unless-stopped
   ports:
     - 11434:11434
@@ -34,7 +45,7 @@ x-ollama: &service-ollama
 
 x-init-ollama: &init-ollama
   image: ollama/ollama:latest
-  networks: ['demo']
+  networks: ['traefik']
   container_name: ollama-pull-llama
   volumes:
     - ollama_storage:/root/.ollama
@@ -46,7 +57,7 @@ x-init-ollama: &init-ollama
 services:
   postgres:
     image: postgres:16-alpine
-    networks: ['demo']
+    networks: ['traefik']
     restart: unless-stopped
     environment:
       - POSTGRES_USER
@@ -92,7 +103,7 @@ services:
   qdrant:
     image: qdrant/qdrant
     container_name: qdrant
-    networks: ['demo']
+    networks: ['traefik']
     restart: unless-stopped
     ports:
       - 6333:6333
@@ -125,3 +136,37 @@ services:
     <<: *init-ollama
     depends_on:
       - ollama-gpu
+
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    container_name: changedetection
+    hostname: changedetection
+    networks: ['traefik']
+    volumes:
+      - changedetection_storage:/datastore  # Main data volume
+    environment:
+      - PORT=20400  # Port for changedetection
+      - PUID=0  # Running as root
+      - PGID=0  # Running as root
+      - PLAYWRIGHT_DRIVER_URL=ws://playwright-chrome:3000/chrome?token=${PLAYWRIGHT_TOKEN}&launch={"headless":false}  # WebSocket connection for Playwright
+    ports:
+      - 20400:20400  # Port mapping for changedetection
+    restart: unless-stopped
+    depends_on:
+      - playwright-chrome
+
+  playwright-chrome:
+    hostname: playwright-chrome
+    image: ghcr.io/browserless/chrome
+    networks: ['traefik']
+    restart: unless-stopped
+    environment:
+      - TOKEN=${PLAYWRIGHT_TOKEN}
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1024
+      - SCREEN_DEPTH=16
+      - ENABLE_DEBUGGER=true
+      - TIMEOUT=600000
+      - CONCURRENT=15
+    ports:
+      - 20450:3000  # Port mapping for Playwright WebSocket connection
