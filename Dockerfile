@@ -26,7 +26,19 @@ RUN cd /opt/Python-${PYTHON_VERSION} \
     && rm /opt/Python-${PYTHON_VERSION}.tgz /opt/Python-${PYTHON_VERSION} -rf
 
 # install ffmpeg
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache \
+    ffmpeg \
+    ffmpeg-dev \
+    build-base \
+    pkgconf \
+    libavformat-dev \
+    libavcodec-dev \
+    libavdevice-dev \
+    libavutil-dev \
+    libavfilter-dev \
+    libswscale-dev \
+    libswresample-dev
+
 # install poetry
 RUN pip3 install poetry==1.2.0 pandas numpy==1.26.4 pyarrow pyav
 # install pytorch(CPU)
