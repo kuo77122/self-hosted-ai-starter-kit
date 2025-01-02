@@ -26,21 +26,10 @@ RUN cd /opt/Python-${PYTHON_VERSION} \
     && rm /opt/Python-${PYTHON_VERSION}.tgz /opt/Python-${PYTHON_VERSION} -rf
 
 # install ffmpeg
-RUN apk add --no-cache \
-    ffmpeg \
-    ffmpeg-dev \
-    build-base \
-    pkgconf \
-    libavformat-dev \
-    libavcodec-dev \
-    libavdevice-dev \
-    libavutil-dev \
-    libavfilter-dev \
-    libswscale-dev \
-    libswresample-dev
+RUN apk add --no-cache ffmpeg
 
 # install poetry
-RUN pip3 install poetry==1.2.0 pandas numpy==1.26.4 pyarrow pyav
+RUN pip3 install poetry==1.2.0 pandas numpy==1.26.4 pyarrow
 # install pytorch(CPU)
 RUN pip3 install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cpu
 # install whisperx
