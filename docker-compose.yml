@@ -190,7 +190,7 @@ services:
       - "traefik.http.routers.nocodb-http.rule=(Host(`nocodb.fattynan.com`))"
       - "traefik.http.routers.nocodb-http.service=nocodb-backend"
       - "traefik.http.services.nocodb-backend.loadbalancer.server.scheme=http"
-      - "traefik.http.services.nocodb-backend.loadbalancer.server.port=8080"
+      - "traefik.http.services.nocodb-backend.loadbalancer.server.port=7778"
     depends_on:
       postgres:
         condition: service_healthy
@@ -202,7 +202,7 @@ services:
     image: nocodb/nocodb:0.260.0
     networks: ['traefik']
     ports:
-      - "8080:8080"
+      - "7778:8080"
     restart: always
     volumes:
       - "nocode_storage:/usr/app/data"
