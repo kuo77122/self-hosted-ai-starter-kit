@@ -6,6 +6,7 @@ volumes:
   changedetection_storage:
   redis_storage:
   nocode_storage:
+  rabbitmq_storage:
 
 networks:
   traefik:
@@ -30,6 +31,7 @@ x-n8n: &service-n8n
     - N8N_PERSONALIZATION_ENABLED=false
     - N8N_ENCRYPTION_KEY
     - N8N_USER_MANAGEMENT_JWT_SECRET
+    - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
     - GENERIC_TIMEZONE=Asia/Taipei
     - WEBHOOK_URL=https://n8n.fattynan.com
   links:
@@ -205,3 +207,13 @@ services:
     restart: always
     volumes:
       - "nocode_storage:/usr/app/data"
+
+  rabbit_mq:
+    image: rabbitmq:4.0.5-management-alpine
+    networks: ['traefik']
+    restart: always
+    ports:
+        - '5672:5672'
+        - '15672:15672'
+    volumes:
+      - rabbitmq_storage:/usr/share/rabbitmq/data
