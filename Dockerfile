@@ -27,7 +27,7 @@ RUN apk add --update build-base curl nasm tar bzip2 \
     --enable-postproc \
     --enable-libfreetype \
     --enable-openssl \
-    --disable-debug \
+    --disable-debug && \
   make && \
   make install && \
   make distclean && \
