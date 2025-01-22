@@ -3,7 +3,7 @@ FROM n8nio/n8n:1.73.0
 USER root
 
 ARG PYTHON_VERSION=3.11.11
-ENV FFMPEG_VERSION=3.0.2
+ENV FFMPEG_VERSION=7.1
 
 # install ffmpeg
 RUN apk add --update build-base curl nasm tar bzip2 \
